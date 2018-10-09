@@ -3,7 +3,11 @@
     public interface ICalculator
     {
     }
-    public class Calculator
+
+    public interface ICalculator2
+    {
+    }
+    public class Calculator : ICalculator
     {
     }
 }
