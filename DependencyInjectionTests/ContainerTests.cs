@@ -39,7 +39,7 @@ namespace DependencyInjectionTests
         }
 
         [Fact]
-        public void RegisterLifecycleSignletonTest_Success()
+        public void RegisterLifecycleSingletonTest_Success()
         {
             var container = new Container();
             container.Register<ICalculator, Calculator>(LifecycleType.Singleton);
@@ -50,7 +50,7 @@ namespace DependencyInjectionTests
         }
 
         [Fact]
-        public void Resolve_NoParameter_Success()
+        public void ResolveNoParameter_Success()
         {
             var container = new Container();
             container.Register<ICalculator, Calculator>();
@@ -62,7 +62,7 @@ namespace DependencyInjectionTests
         }
 
         [Fact]
-        public void Resolve_NoParameter_DifferentObjects_Success()
+        public void ResolveNoParameterTransientObjects_Success()
         {
             var container = new Container();
             container.Register<ICalculator, Calculator>();
@@ -74,11 +74,48 @@ namespace DependencyInjectionTests
         }
 
         [Fact]
-        public void Resolve_MissingRegister_MissingRegisterException()
+        public void ResolveNoParameterSingletonObjects_Success()
+        {
+            var container = new Container();
+            container.Register<ICalculator, Calculator>(LifecycleType.Singleton);
+
+            var registeredCalculator = container.Resolve<ICalculator>();
+            var registeredCalculator2 = container.Resolve<ICalculator>();
+
+            Assert.Equal(registeredCalculator, registeredCalculator2);
+        }
+
+        [Fact]
+        public void ResolveOneParameterTransient_Success()
+        {
+            var container = new Container();
+            container.Register<ICalculator, Calculator>();
+            container.Register<IMath, Math>();
+
+            var registeredMath = container.Resolve<IMath>();
+
+            Assert.Equal(typeof(Math), registeredMath.GetType());
+        }
+
+        [Fact]
+        public void ResolveOneParameterSingleton_Success()
+        {
+            var container = new Container();
+            container.Register<ICalculator, Calculator>();
+            container.Register<IMath, Math>(LifecycleType.Singleton);
+
+            var registeredMath = container.Resolve<IMath>();
+            var registeredMath2 = container.Resolve<IMath>();
+
+            Assert.Equal(registeredMath2, registeredMath);
+        }
+
+        [Fact]
+        public void ResolveMissingRegister_MissingRegisterException()
         {
             var container = new Container();
 
-            Assert.Throws<MissingRegisterException>(() => container.Resolve<ICalculator2>());
+            Assert.Throws<MissingRegistryException>(() => container.Resolve<ICalculator2>());
         }
 
     }

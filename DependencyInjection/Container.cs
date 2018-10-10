@@ -1,8 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DependencyInjection
 {
+    public class RegisteredObjectInfo
+    {
+        public Type RegisteredType { get; }
+        public Type ConcreteType { get; }
+        public LifecycleType LifecycleType { get; }
+
+        private RegisteredObjectInfo()
+        {
+        }
+
+        public RegisteredObjectInfo(Type registeredType, Type concreteType, LifecycleType lifecycleType)
+        {
+            RegisteredType = registeredType;
+            ConcreteType = concreteType;
+            LifecycleType = lifecycleType;
+        }
+    }
+
     public abstract class RegisteredObject
     {
         public Type RegisteredType { get; }
@@ -11,33 +30,96 @@ namespace DependencyInjection
 
         public LifecycleType LifecycleType { get; }
 
-        protected object Instance { get; set; }
+        protected ObjectRegistry Registry { get; set; }
 
-        public RegisteredObject(Type registeredType, Type concreteType, LifecycleType lifecycleType)
+        public RegisteredObject(Type registeredType, Type concreteType, LifecycleType lifecycleType, ObjectRegistry registry)
         {
             RegisteredType = registeredType;
             ConcreteType = concreteType;
             LifecycleType = lifecycleType;
+            Registry = registry;
         }
 
         public abstract object GetInstance();
+
+        public RegisteredObjectInfo GetRegisteredObjectInfo()
+        {
+            return new RegisteredObjectInfo(RegisteredType, ConcreteType, LifecycleType);
+        }
+
+        protected object CreateInstance(Type type)
+        {
+            var defaultConstructor = type.GetConstructor(Type.EmptyTypes);
+            if (defaultConstructor != null)
+            {
+                return Activator.CreateInstance(type);
+            }
+
+            var allContructors = type.GetConstructors();
+            foreach (var constructor in allContructors.OrderByDescending(p => p.GetParameters().Length))
+            {
+                bool foundConstructor = true;
+                foreach (var parameter in constructor.GetParameters())
+                {
+                    if (!Registry.ContainsResolveType(parameter.ParameterType))
+                    {
+                        foundConstructor = false;
+                        break;
+                    }
+                }
+
+                if (foundConstructor)
+                {
+                    var parameterObjects = new List<object>();
+
+                    foreach (var parameter in constructor.GetParameters())
+                    {
+                        parameterObjects.Add(Registry.ResolveObject(parameter.ParameterType));
+                    }
+
+                    return constructor.Invoke(parameterObjects.ToArray());
+                }
+            }
+
+            throw new MissingRegistryException($"Could not find a resolvable constructor for {type.Name}");
+        }
     }
 
     public class TransientRegisteredObject : RegisteredObject
-   {
-        public TransientRegisteredObject(Type registeredType, Type concreteType, LifecycleType lifecycleType)
-            : base(registeredType, concreteType, lifecycleType)
+    {
+        public TransientRegisteredObject(Type registeredType, Type concreteType, LifecycleType lifecycleType, ObjectRegistry registry)
+            : base(registeredType, concreteType, lifecycleType, registry)
         {
         }
 
         public override object GetInstance()
         {
-            return Activator.CreateInstance(ConcreteType);
+            return CreateInstance(ConcreteType);
         }
     }
 
-    public interface IRegisteredObject
+    public class SingletonRegisteredObject : RegisteredObject
     {
+        Dictionary<Type, object> RegisteredSingletons { get; set; }
+
+        public SingletonRegisteredObject(Type registeredType, Type concreteType, LifecycleType lifecycleType, ObjectRegistry registry)
+            : base(registeredType, concreteType, lifecycleType, registry)
+        {
+            RegisteredSingletons = new Dictionary<Type, object>();
+        }
+
+        public override object GetInstance()
+        {
+            if (RegisteredSingletons.ContainsKey(RegisteredType))
+            {
+                return RegisteredSingletons[RegisteredType];
+            }
+
+            var instance = CreateInstance(ConcreteType);
+            RegisteredSingletons.Add(RegisteredType, instance);
+
+            return instance;
+        }
     }
 
     public enum LifecycleType
@@ -51,16 +133,64 @@ namespace DependencyInjection
         void Register<TRegisteredType, TConcrete>();
         void Register<TRegisteredType, TConcrete>(LifecycleType lifecycleType);
     }
-    public class Container : IContainer
+
+    public class ObjectRegistry
     {
         /// <summary>
         /// Dictionary of RegisteredType, RegisteredObject for faster lookups
         /// </summary>
+
         protected IDictionary<Type, RegisteredObject> RegisteredObjects { get; private set; }
+
+        public ObjectRegistry()
+        {
+            RegisteredObjects = new Dictionary<Type, RegisteredObject>();
+        }
+        public void AddObject(Type resolveType, Type concreteType, LifecycleType lifecycleType)
+        {
+            if (lifecycleType == LifecycleType.Transient)
+            {
+                RegisteredObjects.Add(resolveType, new TransientRegisteredObject(resolveType, concreteType, lifecycleType, this));
+            }
+            else if (lifecycleType == LifecycleType.Singleton)
+            {
+                RegisteredObjects.Add(resolveType, new SingletonRegisteredObject(resolveType, concreteType, lifecycleType, this));
+            }
+
+        }
+
+        public bool ContainsResolveType(Type resolveType)
+        {
+            return RegisteredObjects.ContainsKey(resolveType);
+        }
+
+        public object ResolveObject(Type resolveType)
+        {
+            if (ContainsResolveType(resolveType))
+            {
+                return RegisteredObjects[resolveType].GetInstance();
+            }
+
+            throw new MissingRegistryException($"Could not find a registered type for {resolveType.Name}");
+        }
+
+        public RegisteredObjectInfo GetRegisteredObjectInfo(Type resolveType)
+        {
+            if (ContainsResolveType(resolveType))
+            {
+                return RegisteredObjects[resolveType].GetRegisteredObjectInfo();
+            }
+            return null;
+        }
+    }
+
+    public class Container : IContainer
+    {
+        protected ObjectRegistry Registry { get; }
 
         public Container()
         {
-            RegisteredObjects = new Dictionary<Type, RegisteredObject>();
+            Registry = new ObjectRegistry();
         }
         public void Register<TRegisteredType, TConcrete>()
         {
@@ -69,30 +199,31 @@ namespace DependencyInjection
 
         public void Register<TResolve, TConcrete>(LifecycleType lifecycleType)
         {
-            RegisteredObjects.Add(typeof(TResolve), new TransientRegisteredObject(typeof(TResolve), typeof(TConcrete), lifecycleType));
+            Registry.AddObject(typeof(TResolve), typeof(TConcrete), lifecycleType);
         }
 
         public TResolve Resolve<TResolve>()
         {
-            if (!RegisteredObjects.ContainsKey(typeof(TResolve)))
-                throw new MissingRegisterException($"Type {typeof(TResolve).Name} not registered.");
+            if (!Registry.ContainsResolveType(typeof(TResolve)))
+                throw new MissingRegistryException($"Type {typeof(TResolve).Name} not registered.");
 
-            return (TResolve)RegisteredObjects[typeof(TResolve)].GetInstance();
+            return (TResolve)Registry.ResolveObject(typeof(TResolve));
         }
 
-        public RegisteredObject Registered<TResolve>()
+        public RegisteredObjectInfo Registered<TResolve>()
         {
-            if (RegisteredObjects.ContainsKey(typeof(TResolve)))
-                return RegisteredObjects[typeof(TResolve)];
-            return null;
+            return Registry.GetRegisteredObjectInfo(typeof(TResolve));
         }
     }
 
-    public class MissingRegisterException : Exception
+    public class MissingRegistryException : Exception
     {
-        public MissingRegisterException(string message)
+        public MissingRegistryException(string message)
             : base(message)
         {
         }
     }
 }
+
+
+
