@@ -8,7 +8,7 @@ namespace DependencyInjectionTests
         [Fact]
         public void RegisterTypeTest_Success()
         {
-            var container = new Container();
+            IContainer container = new Container();
 
             container.Register<ICalculator, Calculator>();
             var registeredCalculator = container.Registered<ICalculator>();
@@ -19,7 +19,7 @@ namespace DependencyInjectionTests
         [Fact]
         public void RegisterConcreteTypeTest_Success()
         {
-            var container = new Container();
+            IContainer container = new Container();
 
             container.Register<ICalculator, Calculator>();
             var registeredCalculator = container.Registered<ICalculator>();
@@ -30,7 +30,7 @@ namespace DependencyInjectionTests
         [Fact]
         public void RegisterDefaultLifecycleTypeTest_Success()
         {
-            var container = new Container();
+            IContainer container = new Container();
 
             container.Register<ICalculator, Calculator>();
             var registeredCalculator = container.Registered<ICalculator>();
@@ -41,7 +41,7 @@ namespace DependencyInjectionTests
         [Fact]
         public void RegisterLifecycleSingletonTest_Success()
         {
-            var container = new Container();
+            IContainer container = new Container();
             container.Register<ICalculator, Calculator>(LifecycleType.Singleton);
 
             var registeredCalculator = container.Registered<ICalculator>();
@@ -52,7 +52,7 @@ namespace DependencyInjectionTests
         [Fact]
         public void ResolveNoParameter_Success()
         {
-            var container = new Container();
+            IContainer container = new Container();
             container.Register<ICalculator, Calculator>();
 
             var registeredCalculator = container.Resolve<ICalculator>();
@@ -64,7 +64,7 @@ namespace DependencyInjectionTests
         [Fact]
         public void ResolveNoParameterTransientObjects_Success()
         {
-            var container = new Container();
+            IContainer container = new Container();
             container.Register<ICalculator, Calculator>();
 
             var registeredCalculator = container.Resolve<ICalculator>();
@@ -76,7 +76,7 @@ namespace DependencyInjectionTests
         [Fact]
         public void ResolveNoParameterSingletonObjects_Success()
         {
-            var container = new Container();
+            IContainer container = new Container();
             container.Register<ICalculator, Calculator>(LifecycleType.Singleton);
 
             var registeredCalculator = container.Resolve<ICalculator>();
@@ -88,7 +88,7 @@ namespace DependencyInjectionTests
         [Fact]
         public void ResolveOneParameterTransient_Success()
         {
-            var container = new Container();
+            IContainer container = new Container();
             container.Register<ICalculator, Calculator>();
             container.Register<IMath, Math>();
 
@@ -100,7 +100,7 @@ namespace DependencyInjectionTests
         [Fact]
         public void ResolveOneParameterSingleton_Success()
         {
-            var container = new Container();
+            IContainer container = new Container();
             container.Register<ICalculator, Calculator>();
             container.Register<IMath, Math>(LifecycleType.Singleton);
 

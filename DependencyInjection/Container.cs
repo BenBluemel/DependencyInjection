@@ -128,12 +128,6 @@ namespace DependencyInjection
         Singleton
     }
 
-    public interface IContainer
-    {
-        void Register<TRegisteredType, TConcrete>();
-        void Register<TRegisteredType, TConcrete>(LifecycleType lifecycleType);
-    }
-
     public class ObjectRegistry
     {
         /// <summary>
@@ -182,6 +176,14 @@ namespace DependencyInjection
             }
             return null;
         }
+    }
+
+    public interface IContainer
+    {
+        void Register<TRegisteredType, TConcrete>();
+        void Register<TRegisteredType, TConcrete>(LifecycleType lifecycleType);
+        TResolve Resolve<TResolve>();
+        RegisteredObjectInfo Registered<TResolve>();
     }
 
     public class Container : IContainer
