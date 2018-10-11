@@ -1,4 +1,6 @@
-﻿namespace DependencyInjection
+﻿using System;
+
+namespace DependencyInjection
 {
     public class Container : IContainer
     {
@@ -20,10 +22,15 @@
 
         public TResolve Resolve<TResolve>()
         {
-            if (!RegisteredObjects.ContainsType(typeof(TResolve)))
-                throw new MissingRegistryException($"Type {typeof(TResolve).Name} not registered.");
+            return (TResolve)Resolve(typeof(TResolve));
+        }
 
-            return (TResolve)RegisteredObjects.ResolveObject(typeof(TResolve));
+        public object Resolve(Type resolveType)
+        {
+            if (!RegisteredObjects.ContainsType(resolveType))
+                throw new MissingRegistryException($"Type {resolveType.Name} not registered.");
+
+            return RegisteredObjects.ResolveObject(resolveType);
         }
 
         public RegisteredObjectInfo Registered<TResolve>()
