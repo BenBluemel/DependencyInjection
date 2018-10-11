@@ -26,6 +26,11 @@ namespace DependencyInjection
 
         public void AddObject(Type resolveType, Type concreteType, LifecycleType lifecycleType)
         {
+            if (!resolveType.IsAssignableFrom(concreteType))
+            {
+                throw new InvalidCastException($"Type {resolveType.Name} is not assignable from {concreteType.Name}");
+            }
+
             if (lifecycleType == LifecycleType.Transient)
             {
                 RegisteredObjects.Add(resolveType, new TransientRegisteredObject(resolveType, concreteType, lifecycleType, this));

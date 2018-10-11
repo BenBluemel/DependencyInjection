@@ -9,9 +9,18 @@
     }
 
     public interface IMath
+    {        
+    }
+
+    public class Calculator : ICalculator
     {
     }
-    public class Calculator : ICalculator
+
+    public class Calculator2 : ICalculator2
+    {
+    }
+
+    public class SuperCalculator : Calculator
     {
     }
 
@@ -22,7 +31,14 @@
         }
     }
 
-    public class SuperMath : IMath
+    public interface ISuperMath
+    {
+        ICalculator Calcuator { get; set; }
+        ICalculator2 Calcuator2 { get; set; }
+
+    }
+
+    public class SuperMath : ISuperMath
     {
         public ICalculator Calcuator { get; set; }
         public ICalculator2 Calcuator2 { get; set; }

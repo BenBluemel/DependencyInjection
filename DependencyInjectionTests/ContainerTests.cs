@@ -1,4 +1,5 @@
 using DependencyInjection;
+using System;
 using Xunit;
 
 namespace DependencyInjectionTests
@@ -109,6 +110,38 @@ namespace DependencyInjectionTests
 
             Assert.Equal(registeredMath2, registeredMath);
         }
+
+        [Fact]
+        public void ResolveMultipleContructorsAllParametersRegistered_Success()
+        {
+            IContainer container = new Container();
+            container.Register<ICalculator, Calculator>();
+            container.Register<ICalculator2, Calculator2>();
+            container.Register<ISuperMath, SuperMath>();
+
+            var registeredMath = container.Resolve<ISuperMath>();
+
+            Assert.NotNull(registeredMath.Calcuator2);
+        }
+
+        [Fact]
+        public void RegisterBaseClass_Success()
+        {
+            IContainer container = new Container();
+            container.Register<Calculator, SuperCalculator>();
+
+            Calculator calculator = container.Resolve<Calculator>();
+
+            Assert.Equal(typeof(SuperCalculator), calculator.GetType());
+        }
+
+        [Fact]
+        public void RegisterUnassignableTypes_InvalidCastException()
+        {
+            IContainer container = new Container();
+            Assert.Throws<InvalidCastException>(() => container.Register<ICalculator2, Calculator>());
+        }
+
 
         [Fact]
         public void ResolveMissingRegister_MissingRegisterException()
