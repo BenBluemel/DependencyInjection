@@ -42,7 +42,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Container.cs" />
+    <Compile Include="IContainer.cs" />
+    <Compile Include="IRegisteredObjectLookup.cs" />
+    <Compile Include="RegisteredObjectLookup.cs" />
+    <Compile Include="IRegisteredObject.cs" />
+    <Compile Include="MissingRegistryException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RegisteredObject.cs" />
+    <Compile Include="RegisteredObjectInfo.cs" />
+    <Compile Include="SingletonRegisteredObject.cs" />
+    <Compile Include="TransientRegisteredObject.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
