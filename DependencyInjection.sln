@@ -9,8 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DependencyInjectionTests", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication", "WebApplication\WebApplication.csproj", "{35AFF16F-36AB-4386-83CC-2575B5A27B99}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplicationTests", "WebApplicationTests\WebApplicationTests.csproj", "{1BF17CA8-FDD5-4692-B586-1EF42253C18C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -29,10 +27,6 @@ Global
 		{35AFF16F-36AB-4386-83CC-2575B5A27B99}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{35AFF16F-36AB-4386-83CC-2575B5A27B99}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{35AFF16F-36AB-4386-83CC-2575B5A27B99}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1BF17CA8-FDD5-4692-B586-1EF42253C18C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1BF17CA8-FDD5-4692-B586-1EF42253C18C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1BF17CA8-FDD5-4692-B586-1EF42253C18C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1BF17CA8-FDD5-4692-B586-1EF42253C18C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

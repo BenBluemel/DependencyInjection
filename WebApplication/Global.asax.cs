@@ -1,8 +1,6 @@
 ﻿using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
-using WebApplication.Controllers;
-using WebApplication.IoC;
 
 namespace WebApplication
 {
@@ -11,8 +9,7 @@ namespace WebApplication
         protected void Application_Start()
         {
             AreaRegistration.RegisterAllAreas();
-            DependencyInjector.Instance.Container.Register<HomeController, HomeController>();
-            ControllerBuilder.Current.SetControllerFactory(typeof(IoCControllerFactory));
+            IoCRegistration.RegisterIoC();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
