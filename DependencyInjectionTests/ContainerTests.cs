@@ -1,5 +1,6 @@
 using DependencyInjection;
 using System;
+using System.Collections.Generic;
 using Xunit;
 
 namespace DependencyInjectionTests
@@ -59,6 +60,18 @@ namespace DependencyInjectionTests
             var registeredCalculator = container.Resolve<ICalculator>();
 
             Assert.Equal(typeof(Calculator), registeredCalculator.GetType());
+
+        }
+
+        [Fact]
+        public void ResolveGenericNoParameter_Success()
+        {
+            IContainer container = new Container();
+            container.Register<IList<string>, List<string>>();
+
+            var registeredCalculator = container.Resolve<IList<string>>();
+
+            Assert.Equal(typeof(List<string>), registeredCalculator.GetType());
 
         }
 
@@ -150,6 +163,5 @@ namespace DependencyInjectionTests
 
             Assert.Throws<MissingRegistryException>(() => container.Resolve<ICalculator2>());
         }
-
     }
 }
